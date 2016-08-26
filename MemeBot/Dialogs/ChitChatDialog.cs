@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Threading.Tasks;
 using Microsoft.Bot.Connector;
+using MemeBot.Services;
 
 namespace MemeBot.Dialogs
 {
@@ -20,6 +21,27 @@ namespace MemeBot.Dialogs
         {
             var message = await argument;
             await context.PostAsync("You said: " + message.Text);
+            context.Wait(MessageReceivedAsync);
+        }
+
+        public async Task SendGreeting(IDialogContext context, IAwaitable<IMessageActivity> argument)
+        {
+            String greetingString = await ChitChatService.GreetPerson();
+            await context.PostAsync(greetingString);
+            context.Wait(MessageReceivedAsync);
+        }
+
+        public async Task DismissBot(IDialogContext context, IAwaitable<IMessageActivity> argument)
+        {
+            String dismissString = await ChitChatService.DismissBot();
+            await context.PostAsync(dismissString);
+            context.Wait(MessageReceivedAsync);
+        }
+
+        public async Task HelpText(IDialogContext context, IAwaitable<IMessageActivity> argument)
+        {
+            String helpString = await ChitChatService.SendHelpString();
+            await context.PostAsync(helpString);
             context.Wait(MessageReceivedAsync);
         }
     }

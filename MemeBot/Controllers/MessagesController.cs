@@ -4,6 +4,7 @@ using Microsoft.Bot.Connector;
 using Microsoft.Bot.Builder.Dialogs;
 using MemeBot.Dialogs;
 using System.Net.Http;
+using MemeBot.Services;
 
 namespace MemeBot
 {
@@ -20,8 +21,17 @@ namespace MemeBot
             // check if activity is of type message
             if (message != null && message.GetActivityType() == ActivityTypes.Message)
             {
+                UserIntentActivities intent = CommandParseService.ParseIntentFromString(message.Text);
 
-                await Conversation.SendAsync(message, () => new LuisMemeIntentDialog());
+                if (intent == UserIntentActivities.ChitChatGreeting)
+                {
+                    await Conversation.SendAsync(message, () => new ChitChatDialog());
+                }
+                else
+                {
+                    await Conversation.SendAsync(message, () => new LuisMemeIntentDialog());
+                }
+                
             }
             else
             {

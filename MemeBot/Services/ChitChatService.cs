@@ -10,7 +10,6 @@ namespace MemeBot.Services
     {
         private static Random rndGenerator = new Random();
 
-
         public static async Task<String> GreetPerson()
         {
             List<String> PossibleGreetResponses = new List<string>()

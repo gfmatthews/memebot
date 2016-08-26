@@ -156,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Dialogs\ChitChatDialog.cs" />
     <Compile Include="Dialogs\InteractiveDialogConstructs\MemeCreateOrder.cs" />
     <Compile Include="Dialogs\LuisMemeIntentDialog.cs" />
     <Compile Include="Services\CaptionService.cs" />
