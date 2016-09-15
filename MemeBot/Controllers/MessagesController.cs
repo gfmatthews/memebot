@@ -6,6 +6,7 @@ using MemeBot.Dialogs;
 using System.Net.Http;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace MemeBot
 {
@@ -23,6 +24,7 @@ namespace MemeBot
             // check if activity is of type message
             if (message != null && message.GetActivityType() == ActivityTypes.Message)
             {
+
                 // Group Conversation Case
                 if ((bool)message.Conversation.IsGroup)
                 {
@@ -31,6 +33,8 @@ namespace MemeBot
 
                     if (wasBotMentioned)
                     {
+                        await SendTypingIndication(message);
+
                         // filter out the mention words
                         message.Text = message.Text.Replace(botMentionText, "");
                         await Conversation.SendAsync(message, () => new LuisMemeIntentDialog());
@@ -40,6 +44,8 @@ namespace MemeBot
                 // Single user conversation case
                 else
                 {
+                    await SendTypingIndication(message);
+
                     await Conversation.SendAsync(message, () => new LuisMemeIntentDialog());
                 }
             }
@@ -93,6 +99,15 @@ namespace MemeBot
             }
             else
                 return false;
+        }
+
+        private async Task SendTypingIndication(Activity activity)
+        {
+            Activity typing = activity.CreateReply(null);
+            typing.ServiceUrl = activity.ServiceUrl; //bug in ms bot framework? otherwise service URL is null
+            typing.Type = ActivityTypes.Typing;
+            ConnectorClient connector = new ConnectorClient(new Uri(typing.ServiceUrl));
+            await connector.Conversations.SendToConversationAsync(typing);
         }
     }
 }
