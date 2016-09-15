@@ -4,24 +4,44 @@ using Microsoft.Bot.Connector;
 using Microsoft.Bot.Builder.Dialogs;
 using MemeBot.Dialogs;
 using System.Net.Http;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MemeBot
 {
     [BotAuthentication]
     public class MessagesController : ApiController
     {
+        string botMentionText;
+
         /// <summary>
         /// POST: api/Messages
         /// Receive a message from a user and reply to it
         /// </summary>
         public async Task<HttpResponseMessage> Post([FromBody]Activity message)
         {
-            ConnectorClient connector = new ConnectorClient(new System.Uri(message.ServiceUrl));
             // check if activity is of type message
             if (message != null && message.GetActivityType() == ActivityTypes.Message)
             {
+                // Group Conversation Case
+                if ((bool)message.Conversation.IsGroup)
+                {
+                    bool wasBotMentioned = false;
+                    await Task.Run(() => wasBotMentioned = WasBotMentionedInGroupMessage(message));
 
-                await Conversation.SendAsync(message, () => new LuisMemeIntentDialog());
+                    if (wasBotMentioned)
+                    {
+                        // filter out the mention words
+                        message.Text = message.Text.Replace(botMentionText, "");
+                        await Conversation.SendAsync(message, () => new LuisMemeIntentDialog());
+                    }
+                }
+
+                // Single user conversation case
+                else
+                {
+                    await Conversation.SendAsync(message, () => new LuisMemeIntentDialog());
+                }
             }
             else
             {
@@ -57,6 +77,22 @@ namespace MemeBot
             }
 
             return null;
+        }
+
+        // TODO: When c# lets you pass tuples as return types (e.g. c# 7, do that instead of this hacky workaround)
+        private bool WasBotMentionedInGroupMessage(Activity message)
+        {
+            string botIDOnThisChannel = message.Recipient.Id;
+            IEnumerable<Mention> list = message.GetMentions().ToList().Where(mention => mention.Mentioned.Id == botIDOnThisChannel);
+
+            if (list.Count() > 0)
+            {
+                this.botMentionText = list.First().Text;
+                // the bot was mentioned because we have something in the list
+                return true;
+            }
+            else
+                return false;
         }
     }
 }
