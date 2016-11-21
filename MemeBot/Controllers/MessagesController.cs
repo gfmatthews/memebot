@@ -33,7 +33,7 @@ namespace MemeBot
 
                     if (wasBotMentioned)
                     {
-                        await SendTypingIndication(message);
+                        //await SendTypingIndication(message);
 
                         // filter out the mention words
                         message.Text = message.Text.Replace(botMentionText, "");
@@ -44,7 +44,7 @@ namespace MemeBot
                 // Single user conversation case
                 else
                 {
-                    await SendTypingIndication(message);
+                    //await SendTypingIndication(message);
 
                     await Conversation.SendAsync(message, () => new LuisMemeIntentDialog());
                 }
